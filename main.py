@@ -23,6 +23,8 @@ def main():
 
     # Create the client and make a call with the provided prompt
     client = genai.Client(api_key=api_key)
+    
+    # Get response for the prompt
     response = client.models.generate_content(
         model="gemini-2.5-flash", contents=messages
     )
@@ -30,6 +32,7 @@ def main():
     # Get token counts
     prompt_tokens_count = 0
     response_tokens_count = 0
+    
     if response.usage_metadata is not None:
         prompt_tokens_count = response.usage_metadata.prompt_token_count
         response_tokens_count = response.usage_metadata.candidates_token_count
