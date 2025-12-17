@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 import argparse
+from config import SYSTEM_PROMPT
 
 
 def main():
@@ -26,7 +27,9 @@ def main():
     
     # Get response for the prompt
     response = client.models.generate_content(
-        model="gemini-2.5-flash", contents=messages
+        model="gemini-2.5-flash",
+        contents=messages,
+        config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
     )
 
     # Get token counts
