@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-def run_python_file(working_dir, file_path, args=[]):
-    working_dir_abs = os.path.abspath(working_dir)
+def run_python_file(working_directory, file_path, args=[]):
+    working_dir_abs = os.path.abspath(working_directory)
     file_abs = os.path.normpath(os.path.join(working_dir_abs, file_path))
     
     if os.path.commonpath([file_abs, working_dir_abs]) != working_dir_abs:
@@ -16,7 +16,7 @@ def run_python_file(working_dir, file_path, args=[]):
     
     try:
         cmd = ["python3", file_abs] + args
-        result = subprocess.run(cmd, timeout=30, capture_output=True, cwd=working_dir)           
+        result = subprocess.run(cmd, timeout=30, capture_output=True, cwd=working_directory)           
     
         if result.stdout is None:
             return "No output produced"

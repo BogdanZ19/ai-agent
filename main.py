@@ -5,6 +5,7 @@ from google.genai import types
 import argparse
 from config import SYSTEM_PROMPT
 from functions import schema
+from functions.call_function import call_function
 
 
 def main():
@@ -54,12 +55,26 @@ def main():
 
     print("Response:")
     print(response.text)
-    
+
+    function_result_list = []    
     if response.function_calls is not None:
         for function_call in response.function_calls:
-            print(f"Calling function: {function_call.name}({function_call.args})")
+            # print(f"Calling function: {function_call.name}({function_call.args})")
+            function_call_result = call_function(function_call)
+            if len(function_call_result.parts) == 0:
+                raise Exception("function_call_result.parts is EMPTY")
             
-
+            if function_call_result.parts[0].function_response is None:
+                raise Exception("function_call_result.parts[0].function_response is NONE")
+            
+            if function_call_result.parts[0].function_response.response is None:
+                raise Exception("function_call_result.parts[0].function_response.response is NONE")
+            
+            function_result_list.append(function_call_result.parts[0])
+            
+            if args.verbose is True:
+                print(f"-> {function_call_result.parts[0].function_response.response}")            
+            
 
 if __name__ == "__main__":
     main()
