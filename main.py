@@ -4,8 +4,9 @@ from google import genai
 from google.genai import types
 import argparse
 from config import SYSTEM_PROMPT
-from functions import schema
+
 from functions.call_function import call_function
+from functions.get_response import get_response
 
 
 def main():
@@ -26,21 +27,18 @@ def main():
 
     # Create the client and make a call with the provided prompt
     client = genai.Client(api_key=api_key)
-    
+
     # Get response for the prompt
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=messages,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            tools=[schema.available_functions],
-            ),
+    response = get_response(
+        client,
+        "gemini-2.5-flash",
+        messages,   
     )
 
     # Get token counts
     prompt_tokens_count = 0
     response_tokens_count = 0
-    
+
     if response.usage_metadata is not None:
         prompt_tokens_count = response.usage_metadata.prompt_token_count
         response_tokens_count = response.usage_metadata.candidates_token_count
@@ -56,25 +54,29 @@ def main():
     print("Response:")
     print(response.text)
 
-    function_result_list = []    
+    function_result_list = []
     if response.function_calls is not None:
         for function_call in response.function_calls:
             # print(f"Calling function: {function_call.name}({function_call.args})")
             function_call_result = call_function(function_call)
             if len(function_call_result.parts) == 0:
                 raise Exception("function_call_result.parts is EMPTY")
-            
+
             if function_call_result.parts[0].function_response is None:
-                raise Exception("function_call_result.parts[0].function_response is NONE")
-            
+                raise Exception(
+                    "function_call_result.parts[0].function_response is NONE"
+                )
+
             if function_call_result.parts[0].function_response.response is None:
-                raise Exception("function_call_result.parts[0].function_response.response is NONE")
-            
+                raise Exception(
+                    "function_call_result.parts[0].function_response.response is NONE"
+                )
+
             function_result_list.append(function_call_result.parts[0])
-            
+
             if args.verbose is True:
-                print(f"-> {function_call_result.parts[0].function_response.response}")            
-            
+                print(f"-> {function_call_result.parts[0].function_response.response}")
+
 
 if __name__ == "__main__":
     main()
